@@ -1,8 +1,6 @@
 #!/bin/bash
 set -ue
 
-STOCKS_KV=()
-
 # Title: stockquotes.sh
 # A very simple Bash (v3) script that uses the Google Finance API to get stock quotes.
 # You can also post the formatted result message to a slack channel.
@@ -80,15 +78,6 @@ function resolve_stock_name {
         return 1
     fi
 
-    # Get the name of the product.
-    # The format of stocks.tsv is following:
-    # Code <TAB> Name <TAB> Stock Exchange Name
-    if (( ${#STOCKS_KV} == 0 )); then
-        while read -r k v _; do
-            STOCKS_KV["$k"]="$v"
-        done < ./stocks.tsv
-    fi
-    echo -n ${STOCKS_KV[code]}
 }
 
 function post_to_slack {
@@ -252,14 +241,21 @@ if $DUMP; then
     echo "${body[@]}"
 fi
 
-# Load key-value pair (code: name} into this array from a file.
-# (Would be set in ''resolve_stock_name' function)
+# Get the name of the product.
+# The format of stocks.tsv is following:
+# Code <TAB> Name <TAB> Stock Exchange Name
 STOCKS_KV=()
+if [[ -r stocks.tsv ]]; then
+    while read -r k v _; do
+        STOCKS_KV["$k"]="$v"
+    done < stocks.tsv
+fi
+
 msgs=()
 while read -r t l lt_dts c cp pcls; do
     # Remove a double-quote from the first and the last var
     t=${t/\"/}; cp=${cp/\"/}
-    name=$(resolve_stock_name "$t")
+    name=${STOCKS_KV["$t"]}
     [[ -z $name ]] && name="Unknown"
     name="$name ($t)"
     # Format a message
