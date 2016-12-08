@@ -34,10 +34,10 @@ EOL
 
 function urlencode {
     # Note about NKF options:
-    # Normalize CR and/or LF to unix-style LF only (-Lu)
-    # HTML escape '<', '>', '"', '&'. Also normalize unicode characters to ascii (-Z3)
-    # Encode as Quoted-Printable (-MQ)
-    # (Each Quoted-printable line only able to contain 76 or less characters so
+    # -Lu : Normalize CR and/or LF to unix-style LF only.
+    # -Z3 : HTML escape '<', '>', '"', '&'. Also normalize unicode characters to ascii.
+    # -MQ : Encode as Quoted-Printable.
+    # (Each Quoted-printable lines can contain only 76 or less characters so
     # it would be required to remove "=\n"s at the end of each lines by using SED.)
     <<< "$@" \
         nkf -Lu --ic=UTF-8N --oc=UTF-8N -Z3 -MQ |\
