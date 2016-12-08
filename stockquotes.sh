@@ -184,7 +184,7 @@ function read_args {
 # ----------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------
-[[ $# -eq 0 ]] && usage_exit
+(( $# == 0 )) && usage_exit
 required_cmds=(jq)
 
 MARKET=;TICKERS=;SLACK_CHANNEL=;SLACK_TOKEN=
@@ -196,16 +196,19 @@ read_args "$@"
 [[ -n $SLACK_CHANNEL && -z $SLACK_TOKEN ]] && die 'Please set the channel of Slack.'
 [[ -z $SLACK_CHANNEL && -n $SLACK_TOKEN ]] && die 'Please set the token of Slack.'
 
-slack=false
-[[ -n $SLACK_CHANNEL && -n $SLACK_TOKEN ]] && slack=true
 curl_has_urlencode=false
 check_curl_has_urlencode && curl_has_urlencode=true
+
+slack=false
+[[ -n $SLACK_CHANNEL && -n $SLACK_TOKEN ]] && slack=true
+
 if $slack; then
     required_cmds+=(curl)
     if ! $curl_has_urlencode; then
         required_cmds+=(nkf tr sed)
     fi
 fi
+
 check_required_cmds $required_cmds || die "Please install all of required commands: [${required_cmds[*]}]"
 
 # Get the current stock prices
@@ -234,7 +237,7 @@ stockdata="${body[@]}"
 exec 3<&-
 
 if $DUMP; then
-    echo "${body[@]}"
+    echo "${body[@]}\n"
 fi
 
 # Load key-value pair (code: name} into this array from a file.
@@ -263,6 +266,5 @@ if $slack; then
         post_to_slack "$lines"
     fi
 else
-  echo
   echo -n "$lines"
 fi
