@@ -23,9 +23,11 @@ function die {
 
 function usage_exit {
     cat 1>&2 <<EOL
-Usage: $0 -m MARKET -t TICKER[,TICKER2,...] [-c Slack Channel] [-k Slack Token]"
+Usage: ${0/\.\//} -m MARKET -t TICKER[,TICKER2,...] [-c Slack Channel] [-k Slack Token] [-d (Dump fetched json)] 
 
-Example: $0 -m TYO -t 7974,9433 -o
+Examples: 
+${0/\.\//} -m TYO -t 7974,9433 -d
+${0/\.\//} -m TYO -t 7974,9433 -c general -k xoxp-38238591348-xxxxxxx-xxxx-xxxx
 EOL
     exit 1
 }
