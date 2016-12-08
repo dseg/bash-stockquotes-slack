@@ -160,6 +160,9 @@ function read_args {
 	              SLACK_TOKEN=$OPTARG
 	              ;;
             #-m market
+	    # use 'CURRENCY' for currency
+	    # The market code can be searched interactivly through google finance page
+	    # https://www.google.com/finance
             m)
 	              MARKET=$OPTARG
 	              ;;
@@ -192,7 +195,7 @@ MARKET=;TICKERS=;SLACK_CHANNEL=;SLACK_TOKEN=
 DUMP=false;SLACK_PP=false
 
 read_args "$@"
-[[ -n $MARKET ]] || die 'Plase specify the market (-m XYZ).'
+[[ -n $MARKET ]] || die 'Plase specify the market (-m NASDAQ).'
 [[ -n $TICKERS ]] || die 'Plase specify the tickers (-t AAPL,GOOG).'
 [[ -n $SLACK_CHANNEL && -z $SLACK_TOKEN ]] && die 'Please set the channel of Slack.'
 [[ -z $SLACK_CHANNEL && -n $SLACK_TOKEN ]] && die 'Please set the token of Slack.'
@@ -255,6 +258,7 @@ msgs=()
 while read -r t l lt_dts c cp pcls; do
     # Remove a double-quote from the first and the last var
     t=${t/\"/}; cp=${cp/\"/}
+    [[ -z $pcls ]] && pcls=0
     name=${STOCKS_KV["$t"]}
     [[ -z $name ]] && name="Unknown"
     name="$name ($t)"
