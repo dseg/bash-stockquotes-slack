@@ -255,16 +255,15 @@ if [[ -r stocks.tsv ]]; then
 fi
 
 msgs=()
-while read -r t l lt_dts c cp pcls; do
+while read -r _ t l lt_dts c cp pcls _; do
     # Remove a double-quote from the first and the last var
-    t=${t/\"/}; cp=${cp/\"/}
     [[ -z $pcls ]] && pcls=0
     name=${STOCKS_KV["$t"]}
     [[ -z $name ]] && name="Unknown"
     name="$name ($t)"
     # Format a message
     msgs+=("$name *$l* ($c / ${cp}%) ${lt_dts:11:5}")
-done < <(<<< "${stockdata/\/\//}" jq -c '.[]|"\(.t) \(.l) \(.lt_dts) \(.c) \(.cp) \(.pcls)"')
+done < <(<<< "${stockdata/\/\//}" jq -c '.[]|" \(.t) \(.l) \(.lt_dts) \(.c) \(.cp) \(.pcls) "')
 # ^ Remove the comment start strings (//) from head of the result
 
 printf -v lines '%s\n' "${msgs[@]}"
