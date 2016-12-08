@@ -69,8 +69,14 @@ function resolve_stock_name {
     local code
     code="$1"
 
-    [[ -n $code ]] || return 1
-    [ -r ./stocks.tsv ] || return 1
+    if [[ -z $code ]]; then
+        echo -n ""
+        return 1
+    fi
+    if [ ! -r ./stocks.tsv ]; then
+        echo -n ""
+        return 1
+    fi
 
     # Get the name of the product.
     # The format of stocks.tsv is following:
@@ -89,8 +95,10 @@ function post_to_slack {
     # Slack is able to hadle %0A as newline.
 
     local text res
-    if $curl_has_urlencode; then text="$@"
-    else text=$(urlencode "$@")
+    if $curl_has_urlencode; then 
+        text="$@"
+    else 
+        text=$(urlencode "$@")
     fi
 
     # Post to slack
@@ -239,7 +247,7 @@ stockdata="${body[@]}"
 exec 3<&-
 
 if $DUMP; then
-    echo "${body[@]}\n"
+    echo "${body[@]}"
 fi
 
 # Load key-value pair (code: name} into this array from a file.
@@ -267,6 +275,6 @@ if $slack; then
     else
         post_to_slack "$lines"
     fi
-else
-    echo -n "$lines"
 fi
+
+echo -n "$lines"
