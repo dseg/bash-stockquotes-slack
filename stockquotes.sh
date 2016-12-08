@@ -40,9 +40,9 @@ function urlencode {
     # (Each Quoted-printable line only able to contain 76 or less characters so
     # it would be required to remove "=\n"s at the end of each lines by using SED.)
     <<< "$@" \
-      nkf -Lu --ic=UTF-8N --oc=UTF-8N -Z3 -MQ |\
-      sed -e ':a' -e 'N' -e '$!ba' -e 's/=\n//g' |\
-      tr '=' '%'
+        nkf -Lu --ic=UTF-8N --oc=UTF-8N -Z3 -MQ |\
+        sed -e ':a' -e 'N' -e '$!ba' -e 's/=\n//g' |\
+        tr '=' '%'
 
     # Or using php
     # <<< "$@" php -r "print urlencode('$@');"
@@ -59,7 +59,9 @@ function check_curl_has_urlencode {
     read -r _ curlver _ < <(curl --version)
     local major minor
     IFS='.' read -r major minor _ <<< "$curlver"
-    if (( $major >= 7 && $minor >= 18 )); then return 0; fi
+    if (( $major >= 7 && $minor >= 18 )); then 
+        return 0
+    fi
     return 1
 }
 
@@ -219,8 +221,8 @@ echo -e "GET /finance/info?q=$MARKET:$TICKERS HTTP/1.0\n\n" >&3
 head=()
 # -t 1 means 'wait 1 second'
 while read -r -t 1 -u 3 line; do
-  [[ -z $line ]] && break
-  head+=("$line")
+    [[ -z $line ]] && break
+    head+=("$line")
 done
 
 read _ rescode _ <<< ${head[0]}
@@ -229,7 +231,7 @@ read _ rescode _ <<< ${head[0]}
 # Read body
 body=()
 while read -r -u 3 line; do
-  body+=("$line")
+    body+=("$line")
 done
 stockdata="${body[@]}"
 
@@ -266,5 +268,5 @@ if $slack; then
         post_to_slack "$lines"
     fi
 else
-  echo -n "$lines"
+    echo -n "$lines"
 fi
