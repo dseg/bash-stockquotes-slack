@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ue
 
+STOCKS_KV=()
+
 # Title: stockquotes.sh
 # A very simple Bash (v3) script that uses the Google Finance API to get stock quotes.
 # You can also post the formatted result message to a slack channel.
