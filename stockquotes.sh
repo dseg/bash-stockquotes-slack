@@ -216,7 +216,7 @@ fi
 check_required_cmds $required_cmds || die "Please install all of required commands: [${required_cmds[*]}]"
 
 # Get the current stock prices
-exec 3<> /dev/tcp/finance.google.com/80
+exec 3<> /dev/tcp/www.google.com/80
 echo -e "GET /finance/info?q=$MARKET:$TICKERS HTTP/1.0\n\n" >&3
 
 # Read headers. Header and Body is separated by triple newlines.
