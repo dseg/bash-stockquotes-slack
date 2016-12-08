@@ -161,7 +161,7 @@ function read_args {
 	              ;;
             #-m market
 	    # use 'CURRENCY' for currency
-	    # The market code can be searched interactivly through google finance page
+	    # The market code can be searched interactivly on Google finance page
 	    # https://www.google.com/finance
             m)
 	              MARKET=$OPTARG
