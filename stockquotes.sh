@@ -32,20 +32,63 @@ EOL
     exit 1
 }
 
+# Url-encode a given string (in pure Bash)
+# Note:
+# Ported from PHP implementation (php_url_encode())
+# https://github.com/php/php-src/blob/04534b0047819dab067eb09c56c68879608f00cd/ext/standard/url.c
 function urlencode {
+    local i c str char res
+    if [[ -z $1 ]]; then
+        echo Missing an argument to encode.
+        return 1
+    fi
+    str="$1"
+    res=
+    for (( i=0; i<${#str}; i++ )); do
+        char="${str:i:1}"
+        case $char in
+            -|_|\.)
+                res="$res$char"
+                ;;
+            $' ')
+                res="$res+"
+                ;;
+            *)
+                LC_CTYPE=C printf -v c 0x%x "'$char"
+		if (( c < 0x20 || c > 0x7e )); then
+		    # Skip control chars
+		    :
+                elif (( c < 0x30 || ( c < 0x41 && c > 0x39 ) || ( c > 0x5a && c < 0x61 ) || c > 0x7a )); then
+		    # Skip '0x'
+                    res="$res%${c:2}"
+                else
+                    res="$res$char"
+                fi
+                ;;
+        esac
+    done
+    echo -n "$res"
+}
+
+function urlencode_nkf {
+    local res
+
     # Note about NKF options:
     # -Lu : Normalize CR and/or LF to unix-style LF only.
     # -Z3 : HTML escape '<', '>', '"', '&'. Also normalize unicode characters to ascii.
     # -MQ : Encode as Quoted-Printable.
     # (Each Quoted-printable lines can contain only 76 or less characters so
     # it would be required to remove "=\n"s at the end of each lines by using SED.)
-    <<< "$@" \
-        nkf -Lu --ic=UTF-8N --oc=UTF-8N -Z3 -MQ |\
-        sed -e ':a' -e 'N' -e '$!ba' -e 's/=\n//g' |\
-        tr '=' '%'
+    res=$(<<< "$@" nkf -Lu --ic=UTF-8N --oc=UTF-8N -Z3 -MQ)
+    if (( ${#res} > 72 )); then
+        <<< "$res" sed -e ':a' -e 'N' -e '$!ba' -e 's/=\n//g' -e 's/=/%/g'
+    else
+        echo -n "$res"
+    fi
+}
 
-    # Or using php
-    # <<< "$@" php -r "print urlencode('$@');"
+function urlencode_php {
+    <<< "$@" php -r "print urlencode('$@');"
 }
 
 function check_required_cmds {
@@ -59,7 +102,7 @@ function check_curl_has_urlencode {
     read -r _ curlver _ < <(curl --version)
     local major minor
     IFS='.' read -r major minor _ <<< "$curlver"
-    if (( $major >= 7 && $minor >= 18 )); then 
+    if (( $major >= 7 && $minor >= 18 )); then
         return 0
     fi
     return 1
@@ -208,16 +251,14 @@ slack=false
 
 if $slack; then
     required_cmds+=(curl)
-    if ! $curl_has_urlencode; then
-        required_cmds+=(nkf tr sed)
-    fi
 fi
 
 check_required_cmds $required_cmds || die "Please install all of required commands: [${required_cmds[*]}]"
 
 # Get the current stock prices
 exec 3<> /dev/tcp/www.google.com/80
-echo -e "GET /finance/info?q=$MARKET:$TICKERS HTTP/1.0\n\n" >&3
+echo -e "GET /finance/info?q=$MARKET:$TICKERS HTTP/1.0\n\n" 1>&3
+#curl -0is "http://www.google.com/finance/info?q=$MARKET:$TICKERS"
 
 # Read headers. Header and Body is separated by triple newlines.
 head=()
