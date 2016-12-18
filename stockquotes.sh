@@ -55,11 +55,11 @@ function urlencode {
                 ;;
             *)
                 LC_CTYPE=C printf -v c 0x%x "'$char"
-		if (( c < 0x20 || c > 0x7e )); then
-		    # Skip control chars
-		    :
+                if (( c < 0x20 || c > 0x7e )); then
+                    # Skip control chars
+                    :
                 elif (( c < 0x30 || ( c < 0x41 && c > 0x39 ) || ( c > 0x5a && c < 0x61 ) || c > 0x7a )); then
-		    # Skip '0x'
+                    # Skip '0x'
                     res="$res%${c:2}"
                 else
                     res="$res$char"
@@ -203,9 +203,9 @@ function read_args {
 	              SLACK_TOKEN=$OPTARG
 	              ;;
             #-m market
-	    # use 'CURRENCY' for currency
-	    # The market code can be searched interactivly on Google finance page
-	    # https://www.google.com/finance
+	          # use 'CURRENCY' for currency
+	          # The market code can be searched interactivly on Google finance page
+	          # https://www.google.com/finance
             m)
 	              MARKET=$OPTARG
 	              ;;
